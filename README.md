@@ -84,10 +84,24 @@ pip install "lightrag-hku[api]"
 * Installation from Source
 
 ```bash
+git clone https://github.com/HKUDS/LightRAG.git
+cd LightRAG
 # create a Python virtual enviroment if neccesary
 # Install in editable mode with API support
 pip install -e ".[api]"
 ```
+
+* Launching the LightRAG Server with Docker Compose
+
+```
+git clone https://github.com/HKUDS/LightRAG.git
+cd LightRAG
+cp env.example .env
+# modify LLM and Embedding settings in .env
+docker compose up
+```
+
+> Historical versions of LightRAG docker images can be found here: [LightRAG Docker Images]( https://github.com/HKUDS/LightRAG/pkgs/container/lightrag)
 
 ### Install  LightRAG Core
 
@@ -108,7 +122,7 @@ pip install lightrag-hku
 
 ### Quick Start for LightRAG Server
 
-For more information about LightRAG Server, please refer to [LightRAG Server](./lightrag/api/README.md).
+* For more information about LightRAG Server, please refer to [LightRAG Server](./lightrag/api/README.md).
 
 ### Quick Start for LightRAG core
 
@@ -447,7 +461,7 @@ rag = LightRAG(
     embedding_func=EmbeddingFunc(
         embedding_dim=768,
         max_token_size=8192,
-        func=lambda texts: ollama_embedding(
+        func=lambda texts: ollama_embed(
             texts,
             embed_model="nomic-embed-text"
         )
@@ -570,15 +584,15 @@ response = rag.query(
 
 </details>
 
-### Custom User Prompt Support
+### User Prompt vs. Query
 
-Custom user prompts do not affect the query content; they are only used to instruct the LLM on how to handle the query results.  Here's how to use it:
+When using LightRAG for content queries, avoid combining the search process with unrelated output processing, as this significantly impacts query effectiveness. The `user_prompt` parameter in Query Param is specifically designed to address this issue — it does not participate in the RAG retrieval phase, but rather guides the LLM on how to process the retrieved results after the query is completed. Here's how to use it:
 
 ```python
 # Create query parameters
 query_param = QueryParam(
-    mode = "hybrid",  # 或其他模式："local"、"global"、"hybrid"、"mix"和"naive"
-    user_prompt = "Please create the diagram using the Mermaid syntax"
+    mode = "hybrid",  # Other modes：local, global, hybrid, mix, naive
+    user_prompt = "For diagrams, use mermaid format with English/Pinyin node names and Chinese display labels",
 )
 
 # Query and process
